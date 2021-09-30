@@ -7,25 +7,24 @@ const {
   validatePost,
 } = require('../middleware/middleware')
 
-
-
 router.get('/', (req, res, next) => {
   User.get()
-    .then(users => {
+    .then((users) => {
       res.status(200).json(users)
     })
     .catch(next)
 })
 
 router.get('/:id', validateUserId, (req, res) => {
-  console.log(req.user)
+  res.json(req.user)
 })
 
-router.post('/', validateUser, (req, res) => {
-  console.log(req.name)
-
-  // RETURN THE NEWLY CREATED USER OBJECT
-  // this needs a middleware to check that the request body is valid
+router.post('/', validateUser, (req, res, next) => {
+  User.insert({ name: req.name })
+    .then((newUser) => {
+      res.status(201).json(newUser)
+    })
+    .catch(next)
 })
 
 router.put('/:id', validateUserId, validateUser, (req, res) => {
@@ -52,7 +51,7 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   console.log(req.text)
 })
 
-router.use((err, req, res, next) => { //eslint-disable-line
+router.use((err, req, res, next) => {//eslint-disable-line
   res.status(err.status || 500).json({
     message: err.message,
     stack: err.stack,
